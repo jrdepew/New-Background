@@ -20,66 +20,58 @@
 	<div class="coming-soon">RealJaded.com</div>
 	<canvas></canvas>
 	
-		<script>
-var D = {
+	<script>
+    var D = {
+      radius: {},
+      angle: {},
+      worms: [],
+      Random: function(min, max) {
+        return Math.random() * (max - min) + min;
+      },
+      Position: function(center, angle, radius) {
+        var x = center.x + Math.cos(angle) * radius;
+        var y = center.y + Math.sin(angle) * radius;
+        if (x > D.canvas.width) x = x - D.canvas.width;
+        if (x < 0) x = D.canvas.width + x;
+        if (y > D.canvas.height) y = y - D.canvas.height;
+        if (y < 0) y = D.canvas.height + y;
+        return {x: x, y: y}
+      },
+      Change: function(JADE) {
+        var radius = D.Random(D.radius.min, D.radius.max);
+        var sign = JADE.speed < 0 ? 1 : -1;
+        JADE.center = D.Position(JADE.center, JADE.angle.a, JADE.radius + radius);
+        JADE.radius = radius;
+        JADE.speed = 2 * Math.asin(D.speed / JADE.radius) * sign;
+        JADE.angle.a = JADE.angle.a + Math.PI;
+        JADE.angle.b = JADE.angle.a + D.Random(D.angle.min, D.angle.max) * sign;
+      },
+      Move: function(JADE) {
+    var position = D.Position(JADE.center, JADE.angle.a, JADE.radius);
+    JADE.x = position.x;
+    JADE.y = position.y;
+    JADE.points.push({x: JADE.x, y: JADE.y});
 
-  radius: {},
-  angle: {},
-  worms: [],
-
-  Random: function(min, max) {
-    return Math.random() * (max - min) + min;
-  },
-
-  Position: function(center, angle, radius) {
-    var x = center.x + Math.cos(angle) * radius;
-    var y = center.y + Math.sin(angle) * radius;
-
-    if (x > D.canvas.width) x = x - D.canvas.width;
-    if (x < 0) x = D.canvas.width + x;
-    if (y > D.canvas.height) y = y - D.canvas.height;
-    if (y < 0) y = D.canvas.height + y;
-
-    return {x: x, y: y}
-  },
-
-  Change: function(P) {
-    var radius = D.Random(D.radius.min, D.radius.max);
-    var sign = P.speed < 0 ? 1 : -1;
-
-    P.center = D.Position(P.center, P.angle.a, P.radius + radius);
-    P.radius = radius;
-    P.speed = 2 * Math.asin(D.speed / P.radius) * sign;
-    P.angle.a = P.angle.a + Math.PI;
-    P.angle.b = P.angle.a + D.Random(D.angle.min, D.angle.max) * sign;
-  },
-
-  Move: function(P) {
-    var position = D.Position(P.center, P.angle.a, P.radius);
-    P.x = position.x;
-    P.y = position.y;
-    P.points.push({x: P.x, y: P.y});
-
-    if (P.points.length > D.tail) {
-      P.points.shift();
+    if (JADE.points.length > D.tail) {
+      JADE.points.shift();
     }
 
-    for (var i = 0; i < P.points.length; i++) {
-      var size = i * D.size / P.points.length;
+    for (var i = 0; i < JADE.points.length; i++) {
+      var size = i * D.size / JADE.points.length;
       D.ctx.fillStyle = 'rgba(66,222,123,0.5)';
-      D.ctx.fillRect(P.points[i].x, P.points[i].y, size, size);
+      D.ctx.fillRect(JADE.points[i].x, JADE.points[i].y, size, size);
     }
   },
 
   Update: function() {
     for (var i = 0; i < D.worms.length; i++) {
-      var P = D.worms[i];
-      var a = P.angle.a += P.speed;
-      var p = P.speed > 0 && P.angle.a > P.angle.b;
-      var n = P.speed <= 0 && P.angle.a <= P.angle.b;
+      var JADE = D.worms[i];
+      var a = JADE.angle.a += JADE.speed;
+      var p = JADE.speed > 0 && JADE.angle.a > JADE.angle.b;
+      var n = JADE.speed <= 0 && JADE.angle.a <= JADE.angle.b;
 
-      D.Move(P);
-      if (p || n) D.Change(P);
+      D.Move(JADE);
+      if (p || n) D.Change(JADE);
     }
   },
 
@@ -121,13 +113,13 @@ var D = {
     var angle = D.Random(0.1, 0.9);
 
     D.worms = new Array(Math.round(worms));
-    D.tail = Math.round(5000 / D.worms.length * D.Random(0.1, 1));
+    D.tail = Math.round(5000 / D.worms.length * D.Random(0.5, 1));
     D.radius.min = D.Random(1, radius / 2);
     D.radius.max = D.Random(D.radius.min + 1, radius);
     D.size = D.Random(1, 5);
     D.angle.min = Math.PI * angle;
     D.angle.max = Math.PI * (2 - angle);
-    D.speed = D.Random(0.5, 1.5);
+    D.speed = D.Random(0.5, 0.8);
   },
 
   Randomize: function() {
